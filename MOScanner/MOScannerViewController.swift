@@ -160,7 +160,7 @@ extension MOScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
 
 extension MOScannerViewController {
 
-    func addPhotosButton() {
+    private func addPhotosButton() {
         let photoButton = UIButton(type: .custom)
         photoButton.setTitle("Photos", for: .normal)
         photoButton.addTarget(self, action: #selector(clickPhotos), for: .touchUpInside)
@@ -168,7 +168,7 @@ extension MOScannerViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: photoButton)
     }
     
-    @objc func clickPhotos() {
+    @objc private func clickPhotos() {
         MOAuthorizationManager.checkAuthorization(type: .photos) { status in
             if status != .authorized { /// haven't photos permission
                 return
@@ -180,7 +180,7 @@ extension MOScannerViewController {
         }
     }
     
-    func openPhotoLabrary() {
+    private func openPhotoLabrary() {
         let picker = UIImagePickerController()
         picker.title = "Photos"
         picker.delegate = self
@@ -206,7 +206,7 @@ extension MOScannerViewController: UIImagePickerControllerDelegate, UINavigation
     }
     
     /// parse qrCode or barCode
-    func parseBarCode(image: UIImage) {
+    private func parseBarCode(image: UIImage) {
         guard let cgimg = image.cgImage else {
             return
         }
@@ -227,7 +227,7 @@ extension MOScannerViewController: UIImagePickerControllerDelegate, UINavigation
         }
     }
     
-    func handleResults(_ result: [VNObservation]?) {
+    private func handleResults(_ result: [VNObservation]?) {
         guard let results = result, results.count > 0 else {
             print("parseBarCode result is nil: \(String(describing: result))")
             return
@@ -237,7 +237,7 @@ extension MOScannerViewController: UIImagePickerControllerDelegate, UINavigation
         }
     }
     
-    func handleResult(_ result: VNObservation) {
+    private func handleResult(_ result: VNObservation) {
         guard let barcode = result as? VNBarcodeObservation,
               let value = barcode.payloadStringValue else {
             print("handleResult covert to string error: \(result)")
