@@ -4,6 +4,9 @@
 //
 //  Created by mikimo on 2023/4/1.
 //
+//  Add these key-values to in Info.plist to describe the request permission
+//  Privacy - Camera Usage Description
+//  Privacy - Photo Library Usage Description
 
 import UIKit
 import AVFoundation
@@ -66,7 +69,7 @@ class MOScannerViewController: UIViewController {
             print("device error")
             return
         }
-        //  get input stream
+        //  get input
         let input: AVCaptureDeviceInput
         do {
           input = try AVCaptureDeviceInput(device: device)
@@ -74,14 +77,14 @@ class MOScannerViewController: UIViewController {
           print("input error")
           return
         }
-        // get session
-        let output = AVCaptureMetadataOutput()
         if self.captureSession.canAddInput(input) {
             self.captureSession.addInput(input)
         } else {
             print("session can't add input")
             return
         }
+        // get output
+        let output = AVCaptureMetadataOutput()
         if self.captureSession.canAddOutput(output) {
             // Tips: add output must before of set output
             self.captureSession.addOutput(output)
@@ -89,7 +92,7 @@ class MOScannerViewController: UIViewController {
             print("session can't add output")
             return
         }
-        
+
         // Set metadata identification type qr: QR code; Other: Barcode
         let hopeSupportTypes = [AVMetadataObject.ObjectType.qr,
                                 AVMetadataObject.ObjectType.ean13,
@@ -103,7 +106,7 @@ class MOScannerViewController: UIViewController {
         }
         output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
         output.metadataObjectTypes = types
-//        print("support types: \(types)")
+        //        print("support types: \(types)")
                 
         output.rectOfInterest = CGRect(x: 0, y: 0,
                                        width: self.view.bounds.size.width,
@@ -226,7 +229,7 @@ extension MOScannerViewController: UIImagePickerControllerDelegate, UINavigation
             print("parseBarCode error: \(error)")
         }
     }
-    
+
     private func handleResults(_ result: [VNObservation]?) {
         guard let results = result, results.count > 0 else {
             print("parseBarCode result is nil: \(String(describing: result))")
@@ -236,7 +239,7 @@ extension MOScannerViewController: UIImagePickerControllerDelegate, UINavigation
             self.handleResult(result)
         }
     }
-    
+
     private func handleResult(_ result: VNObservation) {
         guard let barcode = result as? VNBarcodeObservation,
               let value = barcode.payloadStringValue else {

@@ -4,9 +4,6 @@
 //
 //  Created by mikimo on 2023/4/1.
 //
-//  Add these key-values to in Info.plist to describe the request permission
-//  Privacy - Camera Usage Description
-//  Privacy - Photo Library Usage Description
 
 import UIKit
 

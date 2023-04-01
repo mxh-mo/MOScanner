@@ -17,7 +17,7 @@ enum MOAuthorizeStatus {
     case unauthorized   // 未授权
     case authorized     // 已授权
     case restricted     // 受限
-    case denied         // 拒绝
+    case denied         // 已拒绝
 }
 
 protocol MOAuthrizationProtocol {
