@@ -9,8 +9,8 @@
 import UIKit
 
 enum MOAuthorizeType {
-    case camera // 相机
-    case photo  // 相册
+    case camera     // 相机
+    case photos     // 相册
 }
 
 enum MOAuthorizeStatus {
@@ -56,7 +56,7 @@ struct MOAuthorizationManager {
     static private func authorizationFactory(type: MOAuthorizeType) -> MOAuthrizationProtocol {
         switch type {
         case .camera: return MOAuthorizationCamera()
-        case .photo: return MOAuthorizationPhoto()
+        case .photos: return MOAuthorizationPhoto()
         }
     }
 }

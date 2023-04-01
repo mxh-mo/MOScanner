@@ -7,6 +7,8 @@
 
 import UIKit
 import AVFoundation
+import Photos
+import Vision
 
 class MOScannerViewController: UIViewController {
 
@@ -26,7 +28,7 @@ class MOScannerViewController: UIViewController {
                                 width: UIScreen.main.bounds.size.width,
                                 height: UIScreen.main.bounds.size.height)
         
-        
+        self.addPhotosButton()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -152,4 +154,101 @@ extension MOScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
         captureSession.stopRunning()
     }
     
+}
+
+// MARK: - Scan from Photos
+
+extension MOScannerViewController {
+
+    func addPhotosButton() {
+        let photoButton = UIButton(type: .custom)
+        photoButton.setTitle("Photos", for: .normal)
+        photoButton.addTarget(self, action: #selector(clickPhotos), for: .touchUpInside)
+        photoButton.frame = CGRect(x: 0.0, y: 0.0, width: 60.0, height: 44.0)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: photoButton)
+    }
+    
+    @objc func clickPhotos() {
+        MOAuthorizationManager.checkAuthorization(type: .photos) { status in
+            if status != .authorized { /// haven't photos permission
+                return
+            }
+            /// have photos permission
+            DispatchQueue.main.async {
+                self.openPhotoLabrary()
+            }
+        }
+    }
+    
+    func openPhotoLabrary() {
+        let picker = UIImagePickerController()
+        picker.title = "Photos"
+        picker.delegate = self
+        picker.allowsEditing = true
+        picker.sourceType = .photoLibrary
+        picker.navigationBar.barStyle = .default
+        self.present(picker, animated: true, completion: nil)
+    }
+}
+
+extension MOScannerViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    /// choose photo callback
+    func imagePickerController(_ picker: UIImagePickerController,
+                               didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        dismiss(animated: true)
+        
+        guard let image = info[.originalImage] as? UIImage else {
+            print("choose not image")
+            return
+        }
+        parseBarCode(image: image)
+    }
+    
+    /// parse qrCode or barCode
+    func parseBarCode(image: UIImage) {
+        guard let cgimg = image.cgImage else {
+            return
+        }
+        
+        let request = VNDetectBarcodesRequest { req, err in
+            if let error = err {
+                print("parseBarCode error: \(error)")
+                return
+            }
+            self.handleResults(req.results)
+        }
+        
+        let handler = VNImageRequestHandler(cgImage: cgimg)
+        do {
+            try handler.perform([request])
+        } catch {
+            print("parseBarCode error: \(error)")
+        }
+    }
+    
+    func handleResults(_ result: [VNObservation]?) {
+        guard let results = result, results.count > 0 else {
+            print("parseBarCode result is nil: \(String(describing: result))")
+            return
+        }
+        for result in results {
+            self.handleResult(result)
+        }
+    }
+    
+    func handleResult(_ result: VNObservation) {
+        guard let barcode = result as? VNBarcodeObservation,
+              let value = barcode.payloadStringValue else {
+            print("handleResult covert to string error: \(result)")
+            return
+        }
+        
+        if barcode.symbology == .qr {
+            print("qrcode: \(value)")
+        } else {
+            print("barcode: \(value), \(barcode.symbology.rawValue)")
+        }
+    }
+
 }
